@@ -9,7 +9,6 @@
 # - Refactor as function
 # - Create unit tests
 
-#https://www.programming-hero.com/code-playground/python/index.html
 #http://i.stanford.edu/pub/cstr/reports/cs/tr/71/190/CS-TR-71-190.pdf
  
 # Q is he set of states
