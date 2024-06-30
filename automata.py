@@ -95,7 +95,11 @@ class CanonicalSemiAutomaton(FiniteSemiAutomaton):
         self._state_count = state_count
         self._input_count = input_count
         self._transition_table = {}
-    
+
+    def state_count(self):
+        '''The number of states.'''
+        return self._state_count
+        
     def states(self):
         return range(self._state_count)
     
@@ -174,6 +178,11 @@ class MooreMachine(FiniteSemiAutomaton):
     def starting_state(self):
         '''Return the starting state of the Moore Machine.'''
         return self._starting_state
+    
+    def set_starting_state(self, state):
+        '''Set the named state as the start. Involves changing state number, as the start state is always 0.'''
+        if state != self.starting_state():
+            self._starting_state = state
 
     def output(self, state):
         '''Return the output for the specific state.'''
@@ -272,6 +281,42 @@ class CanonicalMooreMachine(CanonicalSemiAutomaton, MooreMachine):
             r.append(line)
         return "\n".join(r)
 
+    def set_starting_state(self, state):
+        '''Override this because the Canonical version of the Machine needs to start with state 0.'''
+        old_start = self.starting_state()
+
+        if state != old_start:
+            # We need to swap state 0 with the given one.  Swap outputs, outgoing connections, and incoming ones.
+
+            # Swap the outputs.
+            out = self.output(state)
+            self.set_output(state, self.output(old_start))
+            self.set_output(old_start, out)
+
+            # All incoming arcs are swapped.
+            for s in self.states():
+                for c in self.inputs():
+                    t = self.next_state(s, c)
+                    if t == state:
+                        self.set_arc(s, c, old_start)
+                    elif t == old_start:
+                        self.set_arc(s, c, state)
+
+            # Now exchange the incoming arcs.
+
+            # Compile a dict of the outgoing arcs of the chosen state, to be transferred to state 0.
+            arcs = dict()
+            for c in self.inputs():
+                arcs[c] = self.next_state(state, c)
+
+            for c in self.inputs():
+                self.set_arc(state, c, self.next_state(old_start, c))
+                self.set_arc(old_start, c, arcs[c])
+
+    def delete_state(self, state):
+        # We are about to delete this state. The CanonicalFiniteStateAutomaton superclass does not handle outputs, so we have to do it here.
+        self.set_output(state, self.output(self.state_count() - 1))
+        super().delete_state(state)
     
     def output_count(self):
         '''Return the output alphabet's size.'''
@@ -533,12 +578,17 @@ class TestSemiAutomata(ut.TestCase):
         self.assertEqual(csa.next_state(1, 2), 1)
         self.assertEqual(csa.state_count(), 2)
 
+
     def test_MooreMachine(self):
         mm = MooreMachine({'A', 'B', 'C'}, {'a', 'b'}, lambda s, i: 'A' if i == 'a' else ('B' if i == 'b' else s), 'A', lambda s: ord(s))
 
         self.assertEqual(mm.starting_state(), 'A')
         self.assertEqual(mm.output('B'), 66)
         self.assertEqual(mm.outputs_used(), {65, 66, 67})
+
+        mm.set_starting_state('C')
+        self.assertEqual(mm.starting_state(), 'C')
+
     
     def test_MooreRun(self):
         mm = MooreMachine({'A', 'B', 'C'}, {'a', 'b'}, lambda s, i: 'A' if i == 'a' else ('B' if i == 'b' else s), 'A', lambda s: ord(s))
@@ -572,9 +622,9 @@ class TestSemiAutomata(ut.TestCase):
 
     def test_CanonicalMooreMachine(self):
         cmm = CanonicalMooreMachine.from_string(("1 2 1\n"
-         "0 0 2\n"
-         "0 2 2\n"
-         "0 8 8"))
+                                                "0 0 2\n"
+                                                "0 2 2\n"
+                                                "0 8 8"))
         self.assertEqual(cmm.state_count(), 9)
         self.assertEqual(cmm.output_count(), 2)
         self.assertEqual(cmm.outputs(), {0, 1})
@@ -585,6 +635,26 @@ class TestSemiAutomata(ut.TestCase):
 
         cmm.set_output(2, 1)
         self.assertEqual(cmm.output(2), 1)
+
+        cmm = CanonicalMooreMachine.from_string(("0 0 1 2\n"
+                                                 "1 1 0 2\n"
+                                                 "2 2 0 3\n"
+                                                 "3 0 3 2"))
+        self.assertEqual(cmm.starting_state(), 0)
+        self.assertEqual(cmm.next_state(0, 2), 2)
+
+        cmm.set_starting_state(2)
+
+        cmm2 = CanonicalMooreMachine.from_string(("2 0 2 3\n"
+                                                  "1 1 2 0\n"
+                                                  "0 2 1 0\n"
+                                                  "3 2 3 0"))
+        
+        for s in cmm.states():
+            self.assertEqual(cmm.output(s), cmm2.output(s))
+            for c in cmm.inputs():
+                self.assertEqual(cmm.next_state(s, c), cmm2.next_state(s, c))
+
 
     # def test_minimise(self):
         # cmm = CanonicalMooreMachine.from_string(
