@@ -34,6 +34,10 @@ def main(options, args):
 
     if options.SCENARIO == "CONTROL":
         eco = scenarios.create_CONTROL(options.POPULATION, rng)
+    elif options.SCENARIO == "COMP":
+        eco = scenarios.create_COMP(options.POPULATION, rng)
+    elif options.SCENARIO == "COOP":
+        eco = scenarios.create_COOP(options.POPULATION, rng)
     else:
         raise NotImplementedError("This scenario has not yet been implemented.")
 
@@ -90,7 +94,7 @@ if __name__ == "__main__":
                     help="specifies the starting seed of the random number generator, so runs are repeatable (default: %default)")
     parser.add_option("-p", "--population", type="int", action="store", dest="POPULATION", default=2,
                     help="the number of individuals of each replicator lineage (default: %default)")
-    parser.add_option("-e", "--ecoscenario", choices = ("CONTROL", "COMP"),
+    parser.add_option("-e", "--ecoscenario", choices = ("CONTROL", "COMP", "COOP"),
                     action="store", dest="SCENARIO", default="CONTROL",
                     help="run the SCENARIO identified (default: %default)")
     

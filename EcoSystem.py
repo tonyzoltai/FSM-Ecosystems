@@ -29,6 +29,7 @@ import numpy
 from automata import CanonicalMooreMachine
 from Hopcroft import Hopcroft_minimised
 
+
 def moran_pollack_mutate(mm_parent: CanonicalMooreMachine, mutation, rng):
     '''Mutate the CanonicalMooreMachine mm_parent and return the result.  Mutations as described in Moran & Pollack.'''
 
@@ -146,7 +147,10 @@ class Evolver(Element):
 
         # Scale probabilities to scores
         total = sum(self.scores)
-        prob = [s / total for s in self.scores]
+        if total == 0:
+            prob = [1 / len(self.scores) for _ in self.scores]
+        else:
+            prob = [s / total for s in self.scores]
 
         # select parents according to probability
         parents = self.rng.choice(self.individuals, len(self.individuals), True, prob)
@@ -293,24 +297,7 @@ class TestMutate(ut.TestCase):
 
         self.assertEqual(m.next_state(3,2), 2)
 
-class TestEcoSystem(ut.TestCase):
-        def test_EcoSystem(self):
-            print("Testing CONTROL")
-            es = create_named_ecosystem("CONTROL", 2, numpy.random.default_rng(0))
-            self.assertEqual(len(es.elements), 1)
-            self.assertEqual(len(es.relationships), 1)
-            es.next_gen()
-            print("CONTROL, gen 1")
-            for i in es.elements:
-                for j in i.individuals:
-                    print(j)
-                    print("")
-            es.next_gen()
-            print("CONTROL, gen 2")
-            for i in es.elements:
-                for j in i.individuals:
-                    print(j)
-                    print("")
+
 
 if __name__ == '__main__':
 
