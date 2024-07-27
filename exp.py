@@ -67,9 +67,9 @@ def main(options, args):
             raw_states = [a.state_count() for a in el.individuals]
             complexities = [a.complexity() for a in el.individuals]
             latent_states = [raw_states[i] - complexities[i] for i in range(len(el.individuals))]
-            logging.info(raw_states)
-            logging.info(complexities)
-            logging.info(latent_states)
+            #logging.info(raw_states)
+            #logging.info(complexities)
+            #logging.info(latent_states)
 
             print('output,', i, ',', j, ',', numpy.median(complexities), ',', numpy.median(raw_states), ',', numpy.median(latent_states))
 
