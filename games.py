@@ -79,12 +79,14 @@ def run_game(m1, m2, reward1, reward2):
 
     # Once the loop is detected, total the scores of ONLY THE LOOP, and return the pair of totals.
     t1, t2 = 0, 0
-    for s1, s2 in l[d[(q1,q2)]:]:
+    the_loop = l[d[(q1,q2)]:]
+    loop_len = len(the_loop)
+    for s1, s2 in the_loop:
         t1 += s1
         t2 += s2
     
-    return (t1, t2)
-
+    #return (t1, t2)
+    return (t1/loop_len, t2/loop_len)
 
 
 # UNIT TESTING
@@ -104,12 +106,12 @@ class TestGame(ut.TestCase):
                                                         "1 2 2\n"
                                                         "1 0 0")
         s1, s2 = run_cooperation(m1, m2)
-        self.assertEqual(s1, 7)
-        self.assertEqual(s2, 7)
+        self.assertEqual(s1, 7/12)
+        self.assertEqual(s2, 7/12)
 
         s1, s2 = run_competition(m1, m2)
-        self.assertEqual(s1, 7)
-        self.assertEqual(s2, 5)
+        self.assertEqual(s1, 7/12)
+        self.assertEqual(s2, 5/12)
 
 
 if __name__ == '__main__':
