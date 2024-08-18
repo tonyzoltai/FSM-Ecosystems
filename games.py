@@ -32,6 +32,9 @@ def run_competition(m1, m2):
 def run_cooperation(m1, m2):
     return run_game(m1, m2, REWARD_MATCH, REWARD_MATCH)
 
+def run_mismatch_coop(m1, m2):
+    return run_game(m1, m2, REWARD_MISMATCH, REWARD_MISMATCH)
+
 
 def run_game(m1, m2, reward1, reward2):
     r1 = automata.MooreMachineRun(m1)
@@ -113,6 +116,9 @@ class TestGame(ut.TestCase):
         self.assertEqual(s1, 7/12)
         self.assertEqual(s2, 5/12)
 
+        s1, s2 = run_mismatch_coop(m1, m2)
+        self.assertEqual(s1, 5/12)
+        self.assertEqual(s2, 5/12)
 
 if __name__ == '__main__':
     ut.main()

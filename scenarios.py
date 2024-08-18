@@ -15,7 +15,7 @@ import numpy
 
 from EcoSystem import EcoSystem, Individual, Evolver
 
-from games import run_competition, run_cooperation
+from games import run_competition, run_cooperation, run_mismatch_coop
 
 
 def drift_scores(evolver: Evolver):
@@ -39,6 +39,13 @@ def cooperation_scores(c1: Evolver, c2: Evolver):
             c1.score(i1, s1)
             c2.score(i2, s2)
 
+def mismatch_coop_scores(c1: Evolver, c2: Evolver):
+    '''Two Evolvers cooperate, but BOTH are rewarded for NOT matching.'''
+    for i1, m1 in enumerate(c1.individuals):
+        for i2, m2 in enumerate(c2.individuals):
+            s1, s2 = run_mismatch_coop(m1, m2)
+            c1.score(i1, s1)
+            c2.score(i2, s2)
 
 
 def create_CONTROL(population_size, prn_generator):
@@ -67,7 +74,17 @@ def create_COOP(population_size, prn_generator):
     c2 = Evolver(Individual, population_size, prn_generator)
     e.add_element(c2)
     e.add_relationship(lambda: cooperation_scores(c1, c2))
-    return e    
+    return e
+
+def create_MISMATCH_COOP(population_size, prn_generator):
+    '''Create a COOP ecosystem, but both Evolvers are rewarded for NOT matching.'''
+    e = EcoSystem()
+    c1 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c1)
+    c2 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c2)
+    e.add_relationship(lambda: mismatch_coop_scores(c1, c2))
+    return e
 
 # UNIT TESTING
 
@@ -78,6 +95,12 @@ class TestScenarios(ut.TestCase):
         e = create_CONTROL(10, None)
         self.assertEqual(len(e.elements[0].individuals), 10)
         self.assertEqual(len(e.relationships), 1)
+    
+    def test_MISMATCH_COOP(self) -> None:
+        rng = numpy.random.default_rng(0)
+        e = create_MISMATCH_COOP(10, rng)
+        self.assertEqual(len(e.elements[0].individuals), 10)
+        self.assertEqual(len(e.relationships), 1)        
 
 class TestEcoSystem(ut.TestCase):
         def test_EcoSystem(self):
