@@ -40,6 +40,10 @@ def main(options, args):
         eco = scenarios.create_COOP(options.POPULATION, rng)
     elif options.SCENARIO == "MISMATCH-COOP":
         eco = scenarios.create_MISMATCH_COOP(options.POPULATION, rng)
+    elif options.SCENARIO == "C_X":
+        eco = scenarios.create_C_X(options.POPULATION, rng)
+    elif options.SCENARIO == "M_X":
+        eco = scenarios.create_M_X(options.POPULATION, rng)
     else:
         raise NotImplementedError("This scenario has not yet been implemented.")
 
@@ -96,7 +100,7 @@ if __name__ == "__main__":
                     help="specifies the starting seed of the random number generator, so runs are repeatable (default: %default)")
     parser.add_option("-p", "--population", type="int", action="store", dest="POPULATION", default=2,
                     help="the number of individuals of each replicator lineage (default: %default)")
-    parser.add_option("-e", "--ecoscenario", choices = ("CONTROL", "COMP", "COOP", "MISMATCH-COOP"),
+    parser.add_option("-e", "--ecoscenario", choices = ("CONTROL", "COMP", "COOP", "MISMATCH-COOP", "C_X", "M_X"),
                     action="store", dest="SCENARIO", default="CONTROL",
                     help="run the SCENARIO identified (default: %default)")
     

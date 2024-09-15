@@ -86,6 +86,54 @@ def create_MISMATCH_COOP(population_size, prn_generator):
     e.add_relationship(lambda: mismatch_coop_scores(c1, c2))
     return e
 
+# Scenario Coding:
+# X - COMP
+# C - COOP
+# M - MISMATCH_COOP
+# letter 1: link between elements a and b
+# letterw 2-3: links from a to c and b to c
+# letters 4-6: links from a to d, b to d and c to d
+#
+#TO FROM
+# v abc
+#  +---
+# b|1..
+# c|23.
+# d|456
+#
+# e.g. - M - a mismatch-cooperates with b
+# e.g. - C_X - a cooperates with b which competes with c
+# e.g. - CXC - a cooperates with b and competes with c, b cooperates with c
+# e.g. - CXM__X - a cooperates with b and competes with c, b mismatch-cooperates with c, a and b have no link to d, but c competes with d
+
+def create_C_X(population_size, prn_generator):
+    '''Create a "Mix 3" ecosystem, A cooperates with B, which competes with C.'''
+    e = EcoSystem()
+    c1 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c1)
+    c2 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c2)
+    c3 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c3)
+
+    e.add_relationship(lambda: cooperation_scores(c1, c2))
+    e.add_relationship(lambda: competition_scores(c2, c3))
+    return e
+
+def create_M_X(population_size, prn_generator):
+    '''Create a "Mix 3" ecosystem, A cooperates with B, which competes with C.'''
+    e = EcoSystem()
+    c1 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c1)
+    c2 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c2)
+    c3 = Evolver(Individual, population_size, prn_generator)
+    e.add_element(c3)
+
+    e.add_relationship(lambda: mismatch_coop_scores(c1, c2))
+    e.add_relationship(lambda: competition_scores(c2, c3))
+    return e
+
 # UNIT TESTING
 
 import unittest as ut
