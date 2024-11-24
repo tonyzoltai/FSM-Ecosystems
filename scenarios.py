@@ -48,40 +48,76 @@ def mismatch_coop_scores(c1: Evolver, c2: Evolver):
             c2.score(i2, s2)
 
 
-def create_CONTROL(population_size, prn_generator):
+# SCENARIO CREATOR FUNCTIONS
+# Each function creates an ecosystem scenario.  Standardised parameters:
+# population_size: the number of individuals in the initial population
+# prn_generator: pseudo-random-number generator to use (by passing this around, we can ensure an entire simulation run uses the same generator and original seed)
+# random_out: TRUE if the outputs of the initial automata are to be randomised from the output alphabet; FALSE if canonical 0 output is OK.
+
+def random_out_Individual(rng):
+    '''Create a default Individual, but set its output randomly, using the provided random generator.'''
+    i = Individual()
+    i.set_output(0, rng.choice(list(i.outputs())))
+    return i
+
+def create_CONTROL(population_size, prn_generator, random_out = False):
     '''Create a CONTROL pattern ecosystem.  This is a single Evolver, with no selection, i.e. genetically drifting. '''
+
+    if random_out:
+        individual_creator = lambda: random_out_Individual(prn_generator)
+    else:
+        individual_creator = Individual
+
     e = EcoSystem()
-    d = Evolver(Individual, population_size, prn_generator)
+    d = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(d)
     e.add_relationship(lambda: drift_scores(d))
     return e
 
-def create_COMP(population_size, prn_generator):
+def create_COMP(population_size, prn_generator, random_out = False):
     '''Create a COMP ecosystem.  This is two Evolvers competing, i.e. one rewarded for matching, the other for not.'''
+
+    if random_out:
+        individual_creator = lambda: random_out_Individual(prn_generator)
+    else:
+        individual_creator = Individual
+
     e = EcoSystem()
-    c1 = Evolver(Individual, population_size, prn_generator)
+    c1 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c1)
-    c2 = Evolver(Individual, population_size, prn_generator)
+    c2 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c2)
     e.add_relationship(lambda: competition_scores(c1, c2))
     return e
 
-def create_COOP(population_size, prn_generator):
+def create_COOP(population_size, prn_generator, random_out = False):
     '''Create a COOP ecosystem.  This is two Evolvers cooperating, i.e. both are rewarded for matching, neither for not.'''
+
+    if random_out:
+        individual_creator = lambda: random_out_Individual(prn_generator)
+    else:
+        individual_creator = Individual
+
     e = EcoSystem()
-    c1 = Evolver(Individual, population_size, prn_generator)
+    c1 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c1)
-    c2 = Evolver(Individual, population_size, prn_generator)
+    c2 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c2)
     e.add_relationship(lambda: cooperation_scores(c1, c2))
     return e
 
-def create_MISMATCH_COOP(population_size, prn_generator):
+def create_MISMATCH_COOP(population_size, prn_generator, random_out = False):
     '''Create a COOP ecosystem, but both Evolvers are rewarded for NOT matching.'''
+
+    if random_out:
+        individual_creator = lambda: random_out_Individual(prn_generator)
+    else:
+        individual_creator = Individual
+
     e = EcoSystem()
-    c1 = Evolver(Individual, population_size, prn_generator)
+    c1 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c1)
-    c2 = Evolver(Individual, population_size, prn_generator)
+    c2 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c2)
     e.add_relationship(lambda: mismatch_coop_scores(c1, c2))
     return e
@@ -106,28 +142,40 @@ def create_MISMATCH_COOP(population_size, prn_generator):
 # e.g. - CXC - a cooperates with b and competes with c, b cooperates with c
 # e.g. - CXM__X - a cooperates with b and competes with c, b mismatch-cooperates with c, a and b have no link to d, but c competes with d
 
-def create_C_X(population_size, prn_generator):
+def create_C_X(population_size, prn_generator, random_out = False):
     '''Create a "Mix 3" ecosystem, A cooperates with B, which competes with C.'''
+
+    if random_out:
+        individual_creator = lambda: random_out_Individual(prn_generator)
+    else:
+        individual_creator = Individual
+
     e = EcoSystem()
-    c1 = Evolver(Individual, population_size, prn_generator)
+    c1 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c1)
-    c2 = Evolver(Individual, population_size, prn_generator)
+    c2 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c2)
-    c3 = Evolver(Individual, population_size, prn_generator)
+    c3 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c3)
 
     e.add_relationship(lambda: cooperation_scores(c1, c2))
     e.add_relationship(lambda: competition_scores(c2, c3))
     return e
 
-def create_M_X(population_size, prn_generator):
+def create_M_X(population_size, prn_generator, random_out = False):
     '''Create a "Mix 3" ecosystem, A cooperates with B, which competes with C.'''
+
+    if random_out:
+        individual_creator = lambda: random_out_Individual(prn_generator)
+    else:
+        individual_creator = Individual
+
     e = EcoSystem()
-    c1 = Evolver(Individual, population_size, prn_generator)
+    c1 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c1)
-    c2 = Evolver(Individual, population_size, prn_generator)
+    c2 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c2)
-    c3 = Evolver(Individual, population_size, prn_generator)
+    c3 = Evolver(individual_creator, population_size, prn_generator)
     e.add_element(c3)
 
     e.add_relationship(lambda: mismatch_coop_scores(c1, c2))
@@ -140,10 +188,12 @@ import unittest as ut
 
 class TestScenarios(ut.TestCase):
     def test_CONTROL(self) -> None:
-        e = create_CONTROL(10, None)
+        e = create_CONTROL(10, numpy.random.default_rng(0), True)
         self.assertEqual(len(e.elements[0].individuals), 10)
         self.assertEqual(len(e.relationships), 1)
-    
+        self.assertEqual(e.elements[0].individuals[2].output(0), 1)
+        self.assertEqual(e.elements[0].individuals[3].output(0), 0)
+
     def test_MISMATCH_COOP(self) -> None:
         rng = numpy.random.default_rng(0)
         e = create_MISMATCH_COOP(10, rng)

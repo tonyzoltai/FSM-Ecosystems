@@ -30,20 +30,24 @@ def main(options, args):
 
     rng = numpy.random.default_rng(options.SEED)
 
-        # Create the named ecosystem scenario
+    # RANDOM_OUTPUTS is a boolean; it is true if -r is specified, but it is None if -r is not given.
+    if not options.RANDOM_OUTPUTS:
+        options.RANDOM_OUTPUTS = False
+
+    # Create the named ecosystem scenario
 
     if options.SCENARIO == "CONTROL":
-        eco = scenarios.create_CONTROL(options.POPULATION, rng)
+        eco = scenarios.create_CONTROL(options.POPULATION, rng, options.RANDOM_OUTPUTS)
     elif options.SCENARIO == "COMP":
-        eco = scenarios.create_COMP(options.POPULATION, rng)
+        eco = scenarios.create_COMP(options.POPULATION, rng, options.RANDOM_OUTPUTS)
     elif options.SCENARIO == "COOP":
-        eco = scenarios.create_COOP(options.POPULATION, rng)
+        eco = scenarios.create_COOP(options.POPULATION, rng, options.RANDOM_OUTPUTS)
     elif options.SCENARIO == "MISMATCH-COOP":
-        eco = scenarios.create_MISMATCH_COOP(options.POPULATION, rng)
+        eco = scenarios.create_MISMATCH_COOP(options.POPULATION, rng, options.RANDOM_OUTPUTS)
     elif options.SCENARIO == "C_X":
-        eco = scenarios.create_C_X(options.POPULATION, rng)
+        eco = scenarios.create_C_X(options.POPULATION, rng, options.RANDOM_OUTPUTS)
     elif options.SCENARIO == "M_X":
-        eco = scenarios.create_M_X(options.POPULATION, rng)
+        eco = scenarios.create_M_X(options.POPULATION, rng, options.RANDOM_OUTPUTS)
     else:
         raise NotImplementedError("This scenario has not yet been implemented.")
 
@@ -58,6 +62,7 @@ def main(options, args):
     print('parameter,population,', options.POPULATION)
     print('parameter,generations,', options.GENERATIONS)
     print('parameter,seed,', options.SEED)
+    print('parameter,random_outputs,', options.RANDOM_OUTPUTS)
 
     print('header,Generation,Element,"Median complexity","Median states","Median latent states"')
 
@@ -103,6 +108,7 @@ if __name__ == "__main__":
     parser.add_option("-e", "--ecoscenario", choices = ("CONTROL", "COMP", "COOP", "MISMATCH-COOP", "C_X", "M_X"),
                     action="store", dest="SCENARIO", default="CONTROL",
                     help="run the SCENARIO identified (default: %default)")
+    parser.add_option("-r", "--random_outputs", action="store_true", dest="RANDOM_OUTPUTS", help="initial population members have random outputs")
     
     (options, args) = parser.parse_args()
 
